@@ -1,4 +1,6 @@
-﻿namespace encapsulation01
+﻿using System;
+
+namespace encapsulation01
 {
     internal class Program
     {
@@ -9,28 +11,58 @@
     
     class Weapon
     {
-        public int Damage;
-        public int Bullets;
+        private uint _bullets;
+        private readonly uint _bulletPerOneShoot;
+        
+        public uint Damage { get; private set; }
 
-        public void Fire(Player player)
+        public Weapon(uint bullets, uint bulletPerOneShoot, uint damage)
         {
-            player.Health -= Damage;
-            Bullets -= 1;
+            _bullets = bullets;
+            _bulletPerOneShoot = bulletPerOneShoot;
+            Damage = damage;
+        }
+
+        public bool TryFire()
+        {
+            if (_bullets <= 0) 
+                return false;
+            
+            _bullets -= _bulletPerOneShoot;
+            return true;
         }
     }
 
     class Player
     {
-        public int Health;
+        private int _health;
+
+        public void SetDamage(int damage)
+        {
+            _health -= damage;
+            TryDie();
+        }
+
+        private void TryDie()
+        {
+            if (_health > 0) 
+                return;
+            
+            _health = 0;
+            Console.WriteLine("I died");
+        }
     }
 
     class Bot
     {
-        public Weapon Weapon;
+        private readonly Weapon _weapon = new Weapon(10, 1, 10);
 
         public void OnSeePlayer(Player player)
         {
-            Weapon.Fire(player);
+            if (_weapon.TryFire())
+            {
+                player.SetDamage((int)_weapon.Damage);
+            }
         }
     }
 }
